@@ -1,4 +1,3 @@
-from __future__ import print_function
 import numpy as np
 import cv2
 from cap_from_youtube import cap_from_youtube
@@ -29,7 +28,7 @@ def get_momentum_centroid(contour):
         cx, cy = 0, 0
     return (cx, cy)
 
-def process_frame(
+def preprocess_frame(
         frame, 
         fgbg, 
         gb_kernel_size = 7, 
@@ -37,7 +36,7 @@ def process_frame(
         image_threshold = 170
     ):
     """
-    Process a frame to extract the foreground, reduce noise and convert to a binary image.
+    Preprocess a frame to extract the foreground, reduce noise and convert to a binary image.
 
     Parameters
     ----------
@@ -77,7 +76,9 @@ def detect_and_track_cars(
         cars, 
         history, 
         contourn_min=150, 
-        centroid_dist_threshold=50
+        centroid_dist_threshold=50,
+        pixel_length=7.2,
+        frames_per_second=30
     ):
     """
     Detects and tracks cars in a binary image.
@@ -141,8 +142,6 @@ def detect_and_track_cars(
             # 360 to convert for cm/hr, 
             # and convert for km/h
             cm_to_km_per_hour = 0.036
-            pixel_length = 7.2
-            frames_per_second = 30
 
             car_vel = round(closest_centroid_dist * pixel_length * frames_per_second * cm_to_km_per_hour)
             cv2.putText(rgb_img, str(car_vel) + 'km/h', (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
@@ -190,7 +189,7 @@ def main():
 
         height, width, _ = frame.shape
 
-        binary_image = process_frame(frame, fgbg)
+        binary_image = preprocess_frame(frame, fgbg)
         
         new_history = detect_and_track_cars(frame, binary_image, cars, history)
 
